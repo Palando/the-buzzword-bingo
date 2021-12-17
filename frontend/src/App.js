@@ -6,13 +6,15 @@ import "./App.css";
 
 const POLL_PERIOD = 5000;  // 5 seconds
 
-const username = randomUsernameGenerator.generate();
+// const username = randomUsernameGenerator.generate();
+var username = "";
 
 /* Root component for the application. Handles all top-level state and passes it down as necessary.
  * Since this app is pretty small, there was no need for Redux et al.
  */
 class App extends React.Component {
     state = {
+        usernameSet: false,
         // The randomly generated username for the current user.
         username,
         // The current list of connected users.
@@ -29,10 +31,20 @@ class App extends React.Component {
         cheater: false
     };
 
+    constructor(props) {
+        super(props);
+        this.state = {value: ''};
+    
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+    
     async componentDidMount() {
         // Mark the current user as a connected user on the backend
-        const serverState = await api.users.connect(this.state.username);
-        this.setState(serverState);
+        if(this.state.usernameSet) {
+            //const serverState = await api.users.connect(this.state.username);
+            //this.setState(serverState);
+        }
 
         // Need a forceful re-render when resizing to get all of the components
         // to reflow their layout based on screen width (since raw CSS media queries aren't enough by themselves).
@@ -46,6 +58,14 @@ class App extends React.Component {
         this.pollForUsersTimer = this.pollForUsers();
     }
 
+    async setUserName(name) {
+        // Mark the current user as a connected user on the backend
+        this.state.usernameSet = true;
+        this.state.username = name;
+        const serverState = await api.users.connect(name);
+        this.setState(serverState);
+    }
+
     componentWillUnmount() {
         window.removeEventListener("resize", this.rerender);
         window.removeEventListener("beforeunload", this.disconnect);
@@ -53,7 +73,7 @@ class App extends React.Component {
         this.pollForUsersTimer = null;
     }
 
-    pollForUsers = () => {
+    pollForUsers() {
         return setInterval(async () => {
             const serverState = await api.users.getState();
             this.setState(serverState);
@@ -86,6 +106,16 @@ class App extends React.Component {
 
     isLaptop = () => window.matchMedia("(max-width: 1350px)").matches;
 
+    async handleChange(event) {
+        this.setState({value: event.target.value});
+    }
+    
+    async handleSubmit(event) {
+        //alert('A name was submitted: ' + this.state.value);
+        event.preventDefault();
+        await this.setUserName(this.state.value);
+    }
+
     render() {
         const {alreadyWon, cheater} = this.state;
 
@@ -97,18 +127,32 @@ class App extends React.Component {
                 {cheater && <Restartbar visible={alreadyWon} warning={true} />}
 
                 {
-                    this.isLaptop() ? (
-                        <AppLaptopLayout
-                            {...this.state}
-                            handleWinner={this.handleWinner}
-                            handleCheater={this.handleCheater}
-                        />
+                    this.state.usernameSet ? (
+                        this.isLaptop() ? (
+                            <AppLaptopLayout
+                                {...this.state}
+                                handleWinner={this.handleWinner}
+                                handleCheater={this.handleCheater}
+                            />
+                        ) : (
+                            <AppDesktopLayout
+                                {...this.state}
+                                handleWinner={this.handleWinner}
+                                handleCheater={this.handleCheater}
+                            />
+                        )
                     ) : (
-                        <AppDesktopLayout
-                            {...this.state}
-                            handleWinner={this.handleWinner}
-                            handleCheater={this.handleCheater}
-                        />
+                        <div id="name-form">
+                            <form onSubmit={this.handleSubmit}>
+                                <label>
+                                Enter your name:
+                                <span id="name-form-element"/>
+                                <input type="text" value={this.state.value} onChange={this.handleChange} />
+                                <span id="name-form-element"/>
+                                </label>
+                                <input type="submit" value="Submit"/>
+                            </form>
+                        </div>
                     )
                 }
             </div>
