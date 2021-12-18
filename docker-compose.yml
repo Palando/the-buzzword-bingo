@@ -19,6 +19,8 @@ services:
             - "8080:8080"
         volumes:
             - ./backend/:/backend
+            - backend-deps:/backend/node_modules
 
 volumes:
     frontend-deps:
+    backend-deps:

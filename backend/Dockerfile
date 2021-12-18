@@ -1,4 +1,4 @@
-FROM node:12.14.1-alpine
+FROM node:gallium-alpine
 
 RUN mkdir -p /backend
 WORKDIR /backend

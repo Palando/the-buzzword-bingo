@@ -1,5 +1,5 @@
 import React from "react";
-import randomUsernameGenerator from "random-username-generator";
+// import randomUsernameGenerator from "random-username-generator";
 import api from "./api";
 import {BingoGrid, ConnectedUsers, Restartbar, Titlebar, Winners} from "./components";
 import "./App.css";
