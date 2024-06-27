@@ -1,3 +1,7 @@
+# Note on this fork
+
+I forked the project from https://github.com/DevinSit/the-buzzword-bingo to make some adjustments for an event. I do not maintain it, please use the orginal project if you want to use it.
+
 # The Buzzword Bingo
 
 > Some entertainment for your next corporate get-together!
